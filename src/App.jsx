@@ -39,7 +39,7 @@ export default function App() {
   const [view, setView]     = useState('landing'); // 'landing' | 'assistant' | 'dashboard'
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [view]);
 
   const handleComplete = () => setView('dashboard');

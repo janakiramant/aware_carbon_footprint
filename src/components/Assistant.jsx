@@ -514,7 +514,7 @@ export default function Assistant({ habits, onHabitsChange, onComplete }) {
   const [feedback,    setFeedback]    = useState(null); // null = hidden; object = show toast
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [currentStep]);
 
   const step       = STEPS[currentStep] ?? STEPS[0];
@@ -549,12 +549,15 @@ export default function Assistant({ habits, onHabitsChange, onComplete }) {
    * Performs the actual step-forward transition with a fade animation.
    */
   const handleFeedbackDismiss = useCallback(() => {
-    setFeedback(null);
-    setAnimating(true);
-    setTimeout(() => {
-      setCurrentStep(s => s + 1);
-      setAnimating(false);
-    }, 230);
+    setFeedback(prev => {
+      if (prev === null) return null;
+      setAnimating(true);
+      setTimeout(() => {
+        setCurrentStep(s => s + 1);
+        setAnimating(false);
+      }, 230);
+      return null;
+    });
   }, []);
 
   const handleBack = useCallback(() => {
