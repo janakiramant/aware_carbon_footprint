@@ -513,6 +513,10 @@ export default function Assistant({ habits, onHabitsChange, onComplete }) {
   const [animating,   setAnimating]   = useState(false);
   const [feedback,    setFeedback]    = useState(null); // null = hidden; object = show toast
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentStep]);
+
   const step       = STEPS[currentStep] ?? STEPS[0];
   const isLastStep = currentStep === STEPS.length - 1;
 

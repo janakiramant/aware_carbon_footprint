@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Assistant from './components/Assistant';
 import Dashboard from './components/Dashboard';
 import './index.css';
@@ -37,6 +37,10 @@ const DEFAULT_HABITS = {
 export default function App() {
   const [habits, setHabits] = useState(DEFAULT_HABITS);
   const [view, setView]     = useState('landing'); // 'landing' | 'assistant' | 'dashboard'
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
 
   const handleComplete = () => setView('dashboard');
   const handleReset    = () => { setHabits(DEFAULT_HABITS); setView('assistant'); };
