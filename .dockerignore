@@ -1,0 +1,48 @@
+# .dockerignore
+# Prevents these paths from being sent to the Docker build context.
+# Keeps the image layer small and prevents accidental secret inclusion.
+
+# Node artifacts — reinstalled inside the container by npm ci
+node_modules/
+.npm
+
+# Build output — regenerated inside the container by npm run build
+dist/
+dist-ssr/
+build/
+.vite/
+
+# Version control — not needed inside the container
+.git/
+.gitignore
+
+# Local environment & secrets — must NEVER enter any image layer
+.env
+.env.*
+*.pem
+*.key
+*.p12
+service-account*.json
+credentials*.json
+
+# Docker artifacts themselves
+Dockerfile
+.dockerignore
+docker-entrypoint.sh
+nginx.conf.template
+deploy.sh
+
+# Editor & OS artifacts
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# Test & coverage
+coverage/
+*.lcov
+
+# Documentation (not needed at runtime)
+README.md

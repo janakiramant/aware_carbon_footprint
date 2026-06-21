@@ -1,0 +1,71 @@
+server {
+    # ── Port ──────────────────────────────────────────────────────────────────
+    # ${PORT} is substituted by docker-entrypoint.sh at container startup.
+    # Cloud Run sets $PORT (default 8080). This keeps the config environment-agnostic.
+    listen ${PORT};
+    server_name _;
+
+    # ── Root & Index ──────────────────────────────────────────────────────────
+    root  /usr/share/nginx/html;
+    index index.html;
+
+    # ── Security: hide server fingerprint ─────────────────────────────────────
+    server_tokens off;
+
+    # ── Security Headers ──────────────────────────────────────────────────────
+    # Applied to every response including error pages via 'always'.
+    add_header X-Content-Type-Options    "nosniff"                            always;
+    add_header X-Frame-Options           "DENY"                               always;
+    add_header X-XSS-Protection          "1; mode=block"                      always;
+    add_header Referrer-Policy           "strict-origin-when-cross-origin"    always;
+    add_header Permissions-Policy        "geolocation=(), microphone=(), camera=()" always;
+
+    # Content Security Policy — single quoted string (nginx does not support shell line-continuation)
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none';" always;
+
+    # ── Gzip Compression ──────────────────────────────────────────────────────
+    gzip              on;
+    gzip_vary         on;
+    gzip_min_length   1024;
+    gzip_comp_level   6;
+    gzip_proxied      any;
+    gzip_types
+        text/plain
+        text/css
+        text/javascript
+        application/javascript
+        application/json
+        application/xml
+        image/svg+xml;
+
+    # ── SPA Routing ───────────────────────────────────────────────────────────
+    # All paths fall back to index.html so React Router (or view state) handles
+    # navigation client-side. Returns 404 only if index.html itself is missing.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ── Immutable Static Asset Caching ────────────────────────────────────────
+    # Vite content-hashes JS/CSS filenames, so 1-year immutable cache is safe.
+    location ~* \.(js|css|woff|woff2|ttf|eot|svg|png|jpg|jpeg|gif|ico|webp)$ {
+        expires        1y;
+        add_header     Cache-Control "public, immutable";
+        access_log     off;
+    }
+
+    # ── Cloud Run Health Check ────────────────────────────────────────────────
+    # Cloud Run probes /health (configurable). Returns 200 immediately.
+    location = /health {
+        access_log  off;
+        return      200 "ok\n";
+        add_header  Content-Type text/plain;
+    }
+
+    # ── Block Hidden Files ────────────────────────────────────────────────────
+    # Prevent accidental exposure of .git, .env, .DS_Store etc.
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}

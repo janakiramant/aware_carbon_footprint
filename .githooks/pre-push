@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# .githooks/pre-push
+# ─────────────────────────────────────────────────────────────────────────────
+# Runs the full Vitest test suite before any push to a remote branch.
+# Blocks the push if ANY test fails.
+# Only enforces on pushes targeting 'main' or 'master' branches to allow
+# fast pushes on feature branches while protecting the public trunk.
+#
+# Install: run `bash setup-hooks.sh` once after cloning.
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -euo pipefail
+
+PROTECTED_BRANCHES="main master"
+
+# Read the push target branch from stdin (provided by git)
+while read local_ref local_sha remote_ref remote_sha; do
+  REMOTE_BRANCH="${remote_ref#refs/heads/}"
+
+  for protected in ${PROTECTED_BRANCHES}; do
+    if [[ "${REMOTE_BRANCH}" == "${protected}" ]]; then
+      echo "🧪 [pre-push] Pushing to protected branch '${protected}' — running full test suite..."
+      npm test
+      if [[ $? -ne 0 ]]; then
+        echo "❌ [pre-push] Tests FAILED. Push to '${protected}' blocked."
+        exit 1
+      fi
+      echo "✅ [pre-push] All tests passed — push allowed."
+    fi
+  done
+done
+
+exit 0

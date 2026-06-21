@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit
+# ─────────────────────────────────────────────────────────────────────────────
+# Runs ESLint on the src/ directory before every commit.
+# Blocks the commit if ANY lint error or warning is found (--max-warnings=0).
+#
+# Install: run `bash setup-hooks.sh` once after cloning.
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -euo pipefail
+
+echo "🔍 [pre-commit] Running ESLint..."
+
+# Only lint staged .js/.jsx files that are actually changing
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx)$' || true)
+
+if [[ -z "${STAGED_FILES}" ]]; then
+  echo "✅ [pre-commit] No JS/JSX files staged — skipping lint."
+  exit 0
+fi
+
+# Run ESLint against staged files only for speed
+npx eslint --max-warnings=0 ${STAGED_FILES}
+
+echo "✅ [pre-commit] Lint passed — proceeding with commit."
