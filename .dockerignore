@@ -28,8 +28,6 @@ credentials*.json
 # Docker artifacts themselves
 Dockerfile
 .dockerignore
-docker-entrypoint.sh
-nginx.conf.template
 deploy.sh
 
 # Editor & OS artifacts
